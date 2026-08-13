@@ -1,4 +1,4 @@
-# Local GPT
+# Dugd GPT
 
 An OpenAI-compatible REST API built with **Flask** that uses **Playwright** to communicate with the ChatGPT web interface through your existing Chrome profile.
 
