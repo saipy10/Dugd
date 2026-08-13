@@ -144,7 +144,7 @@ Model name returned by `/v1/models`.
 Example
 
 ```env
-MODEL_ID=chatgpt-browser
+MODEL_ID=dugd-gpt-v1
 ```
 
 ---
@@ -248,7 +248,7 @@ Response
   "object": "list",
   "data": [
     {
-      "id": "chatgpt-browser",
+      "id": "dugd-gpt-v1",
       "object": "model",
       "owned_by": "local"
     }
@@ -268,7 +268,7 @@ Example
 
 ```json
 {
-  "model": "chatgpt-browser",
+  "model": "dugd-gpt-v1",
   "messages": [
     {
       "role": "user",
@@ -283,7 +283,7 @@ Example curl
 ```bash
 curl http://localhost:5000/v1/chat/completions ^
 -H "Content-Type: application/json" ^
--d "{\"model\":\"chatgpt-browser\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}"
+-d "{\"model\":\"dugd-gpt-v1\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}"
 ```
 
 Response
@@ -313,7 +313,7 @@ Example request
 
 ```json
 {
-  "model": "chatgpt-browser",
+  "model": "dugd-gpt-v1",
   "stream": true,
   "messages": [
     {
@@ -341,7 +341,7 @@ http://localhost:5000/v1
 Model
 
 ```
-chatgpt-browser
+dugd-gpt-v1
 ```
 
 API Key
