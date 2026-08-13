@@ -16,7 +16,7 @@ from chat_service import ask_chatgpt, worker
 
 load_dotenv()
 
-MODEL_ID = os.getenv("MODEL_ID", "digd-gpt-v1")
+MODEL_ID = os.getenv("MODEL_ID", "dugd-gpt-v1")
 
 
 # Graceful shutdown via atexit (no async needed)
@@ -30,7 +30,7 @@ atexit.register(shutdown_worker)
 
 
 app = FastAPI(
-    title="Local GPT API",
+    title="Dugd GPT API",
     description="OpenAI-compatible REST API powered by Playwright and ChatGPT",
     version="1.0.0",
 )
