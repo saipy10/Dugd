@@ -1,4 +1,4 @@
-# Local GPT
+# Dugd GPT
 
 An OpenAI-compatible REST API built with **FastAPI** that uses **Playwright** to communicate with the ChatGPT web interface through your existing Chrome profile.
 
@@ -65,9 +65,9 @@ pip install uv
 Clone the repository.
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/saipy10/Dugd-GPT
 
-cd <repository-name>
+cd Dugd-GPT
 ```
 
 Install dependencies.
@@ -94,7 +94,7 @@ Example:
 WINDOWS_USERNAME=YourWindowsUsername
 PROFILE_NAME=Default
 
-MODEL_ID=chatgpt-browser
+MODEL_ID=dugd-gpt-v1
 
 PORT=5000
 ```
