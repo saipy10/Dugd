@@ -5,6 +5,8 @@ import atexit
 import traceback
 from typing import Any, List, Optional, Union
 
+from logger import logger
+
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -21,7 +23,7 @@ MODEL_ID = os.getenv("MODEL_ID", "dugd-gpt-v1")
 
 # Graceful shutdown via atexit (no async needed)
 def shutdown_worker():
-    print("Shutting down browser worker thread...")
+    logger.info("Shutting down browser worker thread...")
     worker.task_queue.put((None, None))
     worker.join(timeout=5.0)
 
@@ -134,7 +136,7 @@ def http_exception_handler(request: Request, exc: HTTPException):
 
 @app.exception_handler(Exception)
 def global_exception_handler(request: Request, exc: Exception):
-    traceback.print_exc()
+    logger.exception("An unhandled exception occurred")
     return openai_error_response(str(exc), status_code=500, error_type="server_error")
 
 
@@ -219,7 +221,7 @@ def sse_stream_generator(generator, model: str, completion_id: str, created: int
 
         yield "data: [DONE]\n\n"
     except Exception as e:
-        traceback.print_exc()
+        logger.exception("An error occurred during SSE streaming")
         err_event = {
             "error": {
                 "message": str(e),

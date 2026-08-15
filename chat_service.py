@@ -8,6 +8,8 @@ from typing import Generator
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, Playwright, BrowserContext, Page
 
+from logger import logger
+
 load_dotenv()
 
 USERNAME = os.getenv("WINDOWS_USERNAME")
@@ -74,9 +76,12 @@ class ChatGPTBrowserSession:
                 return
             except Exception:
                 # Page or browser is dead, clean up and restart
+                logger.warning("Existing browser session is dead, cleaning up and restarting.")
                 self.close()
 
+        logger.debug("Cloning profile if needed.")
         clone_profile_if_needed()
+        logger.debug("Starting Playwright.")
         self.playwright = sync_playwright().start()
         self.context = self.playwright.chromium.launch_persistent_context(
             CLONE_PROFILE_DIR,
@@ -97,6 +102,7 @@ class ChatGPTBrowserSession:
             ),
         )
         self.page = self.context.pages[0] if self.context.pages else self.context.new_page()
+        logger.debug("Navigating to https://chatgpt.com/ (wait_until=networkidle).")
         self.page.goto("https://chatgpt.com/", wait_until="networkidle")
 
     def close(self):
@@ -129,10 +135,12 @@ session = ChatGPTBrowserSession()
 
 def ask_chatgpt_internal(prompt_text: str) -> Generator[str, None, None]:
     try:
+        logger.debug("Preparing browser session for new prompt.")
         yield "_⚙️ Preparing browser..._\n\n"
         session.start()
         page = session.page
         
+        logger.debug("Navigating to chat UI.")
         yield "_⚙️ Navigating to chat..._\n\n"
 
         # Avoid full page reloads by checking current URL and using client-side navigation
@@ -175,7 +183,8 @@ def ask_chatgpt_internal(prompt_text: str) -> Generator[str, None, None]:
                         page.wait_for_url(lambda url: "chatgpt.com/c/" not in url, timeout=3000)
                 else:
                     raise RuntimeError("No client-side navigation element found")
-            except Exception:
+            except Exception as e:
+                logger.warning(f"Client-side navigation failed: {e}. Falling back to page reload.")
                 page.goto("https://chatgpt.com/", wait_until="domcontentloaded")
 
         page.wait_for_selector(
@@ -190,8 +199,10 @@ def ask_chatgpt_internal(prompt_text: str) -> Generator[str, None, None]:
             try:
                 auth_modal.wait_for(state="hidden", timeout=2000)
             except Exception:
+                logger.debug("No auth modal to wait for, or wait timed out.")
                 pass
 
+        logger.debug("Typing the prompt into the textarea.")
         yield "_⚙️ Typing prompt..._\n\n"
         textarea = page.locator("#prompt-textarea")
         textarea.click()
@@ -214,6 +225,7 @@ def ask_chatgpt_internal(prompt_text: str) -> Generator[str, None, None]:
         )
         initial_count = assistant_locator.count()
 
+        logger.debug(f"Current assistant messages count: {initial_count}. Waiting for response to start.")
         yield "_⚙️ Waiting for ChatGPT to respond..._\n\n---\n\n"
         send_button.click()
 
@@ -222,6 +234,7 @@ def ask_chatgpt_internal(prompt_text: str) -> Generator[str, None, None]:
         try:
             new_message_locator.wait_for(state="attached", timeout=15000)
         except Exception:
+            logger.error("Timeout waiting for assistant response to start (attached state).")
             raise RuntimeError("Timeout waiting for assistant response to start")
 
         # Poll text periodically and yield differences
@@ -280,6 +293,7 @@ def ask_chatgpt_internal(prompt_text: str) -> Generator[str, None, None]:
             else:
                 # If not started yet, timeout after 15 seconds
                 if time.time() - start_poll_time > 15:
+                    logger.error("Timeout waiting for response text to start generating.")
                     raise RuntimeError("Timeout waiting for response to start")
 
             # Safety timeout (2 minutes)
@@ -316,6 +330,7 @@ def ask_chatgpt_internal(prompt_text: str) -> Generator[str, None, None]:
                 yield final_text[len(yielded_text):]
 
     except Exception as e:
+        logger.exception("An error occurred during ask_chatgpt_internal execution")
         session.close()
         raise e
 
@@ -326,12 +341,12 @@ class PlaywrightWorker(threading.Thread):
         self.task_queue = queue.Queue()
 
     def run(self):
-        print("Playwright worker thread ready (browser starts on first request).")
+        logger.info("Playwright worker thread ready (browser starts on first request).")
 
         while True:
             task = self.task_queue.get()
             if task == (None, None):
-                print("Shutting down browser session on worker thread...")
+                logger.info("Shutting down browser session on worker thread...")
                 try:
                     session.close()
                 except Exception:
