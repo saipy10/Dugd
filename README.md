@@ -1,4 +1,4 @@
-# Dugd GPT
+# Dugd
 
 <img width="2048" height="768" alt="Header" src="https://github.com/user-attachments/assets/1ec9bbe1-cefa-429f-8ecb-2779fb6ea3a3" />
 
