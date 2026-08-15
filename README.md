@@ -1,6 +1,6 @@
 # Dugd GPT
 
-An OpenAI-compatible REST API built with **Flask** that uses **Playwright** to communicate with the ChatGPT web interface through your existing Chrome profile.
+An OpenAI-compatible REST API built with **FastAPI** that uses **Playwright** to communicate with the ChatGPT web interface through your existing Chrome profile.
 
 This project allows applications such as VS Code, Continue, Cline, Roo Code, Cursor, and other OpenAI-compatible clients to use ChatGPT through a local API endpoint without using the OpenAI API.
 
@@ -9,12 +9,14 @@ This project allows applications such as VS Code, Continue, Cline, Roo Code, Cur
 # Features
 
 - OpenAI-compatible `/v1/chat/completions` endpoint
-- Streaming (`stream=true`) support
+- Streaming (`stream=true`) support via Server-Sent Events (SSE)
 - `/v1/models` endpoint
 - `/health` endpoint
+- Interactive API documentation (Swagger UI at `/docs` & ReDoc at `/redoc`)
+- Pydantic schema validation & custom error handling
 - Uses your existing Chrome login
 - Headless Playwright automation
-- Flask server
+- FastAPI server with Uvicorn ASGI server
 - Uses `uv` for dependency management
 - No browser extensions required
 
@@ -63,9 +65,9 @@ pip install uv
 Clone the repository.
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/saipy10/Dugd-GPT
 
-cd <repository-name>
+cd Dugd-GPT
 ```
 
 Install dependencies.
@@ -92,7 +94,7 @@ Example:
 WINDOWS_USERNAME=YourWindowsUsername
 PROFILE_NAME=Default
 
-MODEL_ID=chatgpt-browser
+MODEL_ID=dugd-gpt-v1
 
 PORT=5000
 ```
@@ -142,14 +144,14 @@ Model name returned by `/v1/models`.
 Example
 
 ```env
-MODEL_ID=chatgpt-browser
+MODEL_ID=dugd-gpt-v1
 ```
 
 ---
 
 ### PORT
 
-Flask server port.
+FastAPI server port.
 
 Default
 
@@ -179,10 +181,16 @@ The application clones your Chrome profile into a separate Playwright profile so
 
 # Running
 
-Start the server.
+Start the server using `uv`:
 
 ```bash
 uv run python main.py
+```
+
+or directly using `uvicorn`:
+
+```bash
+uv run uvicorn main:app --host 0.0.0.0 --port 5000
 ```
 
 Server starts on
@@ -190,6 +198,10 @@ Server starts on
 ```
 http://localhost:5000
 ```
+
+You can access interactive API docs at:
+- Swagger UI: `http://localhost:5000/docs`
+- ReDoc: `http://localhost:5000/redoc`
 
 ---
 
@@ -236,7 +248,7 @@ Response
   "object": "list",
   "data": [
     {
-      "id": "chatgpt-browser",
+      "id": "dugd-gpt-v1",
       "object": "model",
       "owned_by": "local"
     }
@@ -256,7 +268,7 @@ Example
 
 ```json
 {
-  "model": "chatgpt-browser",
+  "model": "dugd-gpt-v1",
   "messages": [
     {
       "role": "user",
@@ -271,7 +283,7 @@ Example curl
 ```bash
 curl http://localhost:5000/v1/chat/completions ^
 -H "Content-Type: application/json" ^
--d "{\"model\":\"chatgpt-browser\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}"
+-d "{\"model\":\"dugd-gpt-v1\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}"
 ```
 
 Response
@@ -301,7 +313,7 @@ Example request
 
 ```json
 {
-  "model": "chatgpt-browser",
+  "model": "dugd-gpt-v1",
   "stream": true,
   "messages": [
     {
@@ -329,7 +341,7 @@ http://localhost:5000/v1
 Model
 
 ```
-chatgpt-browser
+dugd-gpt-v1
 ```
 
 API Key
