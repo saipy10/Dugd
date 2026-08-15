@@ -1,7 +1,8 @@
 # Dugd GPT
 
-An OpenAI-compatible REST API built with **FastAPI** that uses **Playwright** to communicate with the ChatGPT web interface through your existing Chrome profile.
+<img width="2048" height="768" alt="Header" src="https://github.com/user-attachments/assets/1ec9bbe1-cefa-429f-8ecb-2779fb6ea3a3" />
 
+An OpenAI-compatible REST API built with **FastAPI** that uses **Playwright** to communicate with the ChatGPT web interface through your existing Chrome profile.
 This project allows applications such as VS Code, Continue, Cline, Roo Code, Cursor, and other OpenAI-compatible clients to use ChatGPT through a local API endpoint without using the OpenAI API.
 
 ---
